@@ -7,6 +7,7 @@ import { UserType } from '../DB/Models/user.model';
 import {
   ConfirmEmailDto,
   ForgetPasswordDto,
+  LoginWithGmailDto,
   ResetPasswordDto,
 } from './auth.dto';
 
@@ -51,6 +52,13 @@ export class AuthController {
   @Post("gmail-register")
   signWithGmail(@Body() body: unknown) {
     return this.authService.signWithGmail(body)
+  }
+
+  // Login With Gmail
+  @Post("gmail-login")
+  @HttpCode(200)
+  loginWithGmail(@Body() body) {
+    return this.authService.loginWithGmail(body)
   }
 
 }

@@ -40,3 +40,11 @@ export class ResetPasswordDto {
   @MinLength(6)
   newPassword: string;
 }
+
+export class LoginWithGmailDto {
+  @IsEmail()
+  email: string;
+
+  @IsString()
+  name: string;
+}

@@ -15,6 +15,7 @@ import { emitter } from 'src/Common/Utils/send-email.utils';
 import {
   ConfirmEmailDto,
   ForgetPasswordDto,
+  LoginWithGmailDto,
   ResetPasswordDto,
 } from './auth.dto';
 import { OAuth2Client } from 'google-auth-library';
@@ -374,5 +375,79 @@ export class AuthService {
 
     return { accessToken, refreshToken };
   }
-  
+
+  // Login With Gmail
+  async loginWithGmail(body) {
+    const { idToken } = body;
+    if (!idToken) throw new BadRequestException('ID token is required');
+
+    const client = new OAuth2Client();
+    const ticket = await client.verifyIdToken({
+      idToken,
+      audience: process.env.WEB_CLIENT_ID,
+    });
+    const { email, email_verified, given_name, family_name, sub }: any =
+      ticket.getPayload();
+
+    if (!email_verified) {
+      throw new BadRequestException('Email not verified');
+    }
+
+    // Check If Email Is Registered Normally (Password Login)
+    const isEmailExist = await this.userRepo.findUserByEmail(email);
+    if (isEmailExist && isEmailExist.provider !== ProviderEnum.GOOGLE) {
+      throw new BadRequestException(
+        'This email is registered with password login. Use normal login.',
+      );
+    }
+
+    // Find Google User
+    let user = await this.userRepo.findOne({
+      googleSub: sub,
+      provider: ProviderEnum.GOOGLE,
+    });
+
+    // Auto Create User If Not Found
+    if (!user) {
+      user = await this.userRepo.createDocument({
+        firstName: given_name,
+        lastName: family_name || '',
+        email,
+        provider: ProviderEnum.GOOGLE,
+        isVerified: true,
+        password: uniqueString(),
+        googleSub: sub,
+        age: 18,
+        gender: GenderEnum.MALE,
+      });
+    }
+
+    // Generate Access And Refresh Tokens
+    const accessToken = this.tokenService.generateToken(
+      {
+        id: user._id,
+        role: user.role,
+        email: user.email,
+      },
+      {
+        expiresIn: '1d',
+        secret: process.env.JWT_ACCESS_SECRET as string,
+        jwtid: uuidv4(),
+      },
+    );
+    const refreshToken = this.tokenService.generateToken(
+      {
+        id: user._id,
+        email: user.email,
+        role: user.role,
+      },
+      {
+        expiresIn: '30d',
+        secret: process.env.JWT_REFRESH_SECRET as string,
+        jwtid: uuidv4(),
+      },
+    );
+
+    return { accessToken, refreshToken };
+  }
 }
