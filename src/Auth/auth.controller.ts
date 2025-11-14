@@ -46,4 +46,11 @@ export class AuthController {
   resetPassword(@Body() body: ResetPasswordDto) {
     return this.authService.resetPassword(body);
   }
+
+  // Signup With Gmail
+  @Post("gmail-register")
+  signWithGmail(@Body() body: unknown) {
+    return this.authService.signWithGmail(body)
+  }
+
 }

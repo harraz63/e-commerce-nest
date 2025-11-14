@@ -6,7 +6,12 @@ import {
   Virtual,
 } from '@nestjs/mongoose';
 import { HydratedDocument } from 'mongoose';
-import { GenderEnum, OtpEnum, RolesEnum } from 'src/Common/Constants';
+import {
+  GenderEnum,
+  OtpEnum,
+  ProviderEnum,
+  RolesEnum,
+} from 'src/Common/Constants';
 
 // OTP Class
 @Schema({ _id: false })
@@ -63,6 +68,12 @@ export class User {
 
   @Prop({ type: otpSchema, required: false })
   otp?: Otp;
+
+  @Prop({ unique: true, sparse: true })
+  googleSub: string;
+
+  @Prop({ enum: ProviderEnum, default: ProviderEnum.LOCAL })
+  provider: string;
 
   @Virtual({
     get: function () {

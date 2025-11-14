@@ -10,13 +10,15 @@ import { UserRepository } from '../DB/Repositories/user.repository';
 import { compareHash, encrypt, generateHash } from '../Common/Utils';
 import { TokenService } from '../Common/Services/token.service';
 import { customAlphabet } from 'nanoid';
-import { OtpEnum } from 'src/Common';
+import { GenderEnum, OtpEnum, ProviderEnum } from 'src/Common';
 import { emitter } from 'src/Common/Utils/send-email.utils';
 import {
   ConfirmEmailDto,
   ForgetPasswordDto,
   ResetPasswordDto,
 } from './auth.dto';
+import { OAuth2Client } from 'google-auth-library';
+import { v4 as uuidv4 } from 'uuid';
 
 const uniqueString = customAlphabet('012345679', 5);
 
@@ -143,6 +145,7 @@ export class AuthService {
       {
         expiresIn: '1d',
         secret: process.env.JWT_ACCESS_SECRET as string,
+        jwtid: uuidv4(),
       },
     );
     const refreshToken = this.tokenService.generateToken(
@@ -154,6 +157,7 @@ export class AuthService {
       {
         expiresIn: '30d',
         secret: process.env.JWT_REFRESH_SECRET as string,
+        jwtid: uuidv4(),
       },
     );
 
@@ -298,4 +302,77 @@ export class AuthService {
 
     return { message: 'Password reset successfully' };
   }
+
+  // Signup With Gmail
+  async signWithGmail(body) {
+    const { idToken } = body;
+    if (!idToken) throw new BadRequestException('ID token is required');
+
+    const client = new OAuth2Client();
+    const ticket = await client.verifyIdToken({
+      idToken,
+      audience: process.env.WEB_CLIENT_ID,
+    });
+
+    const { email, given_name, family_name, email_verified, sub }: any =
+      ticket.getPayload();
+
+    if (!email_verified) throw new BadRequestException('Email is not verified');
+
+    // Creating The User Logic
+    let user = await this.userRepo.findOne({
+      googleSub: sub,
+      provider: ProviderEnum.GOOGLE,
+    });
+
+    if (!user) {
+      // Create New User
+      user = await this.userRepo.createDocument({
+        firstName: given_name,
+        lastName: family_name || ' ',
+        email,
+        provider: ProviderEnum.GOOGLE,
+        isVerified: true,
+        password: generateHash(uniqueString()),
+        age: 18,
+        gender: GenderEnum.MALE,
+        googleSub: sub,
+      });
+    } else {
+      // Update Exixting User
+      user.email = email;
+      user.firstName = given_name;
+      user.lastName = family_name;
+      await user.save();
+    }
+
+    // Generate Access And Refresh Tokens
+    const accessToken = this.tokenService.generateToken(
+      {
+        id: user._id,
+        role: user.role,
+        email: user.email,
+      },
+      {
+        expiresIn: '1d',
+        secret: process.env.JWT_ACCESS_SECRET as string,
+        jwtid: uuidv4(),
+      },
+    );
+    const refreshToken = this.tokenService.generateToken(
+      {
+        id: user._id,
+        email: user.email,
+        role: user.role,
+      },
+      {
+        expiresIn: '30d',
+        secret: process.env.JWT_REFRESH_SECRET as string,
+        jwtid: uuidv4(),
+      },
+    );
+
+    return { accessToken, refreshToken };
+  }
+  
 }
