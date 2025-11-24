@@ -1,1 +1,2 @@
-export { TokenService } from "./token.service";
+export * from "./s3-client.service"
+export * from "./token.service"

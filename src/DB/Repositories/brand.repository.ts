@@ -11,4 +11,14 @@ export class BrandRepository extends BaseRepository<BrandType> {
   ) {
     super(brandModel);
   }
+
+  // Find Brand By Name
+  async findBrandByName(name: string) {
+    return this.brandModel.findOne({ name }).exec();
+  }
+
+  // Find Brand By Id
+  async findBrandById(id: string) {
+    return this.brandModel.findById(id).exec();
+  }
 }

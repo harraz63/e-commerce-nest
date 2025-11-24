@@ -2,14 +2,13 @@ import { MongooseModule, Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
 import { HydratedDocument, Types } from 'mongoose';
 import slugify from 'slugify';
 
-@Schema({ timestamps: true })
-export class Brand {
+// Class
+
+@Schema()
+export class Category {
   @Prop({
     type: String,
-    index: {
-      name: 'idx_name_unique',
-      unique: true,
-    },
+    index: { name: 'idx_name_unique', unique: true },
     trim: true,
     required: true,
   })
@@ -25,27 +24,25 @@ export class Brand {
   })
   slug: string;
 
-  @Prop({
-    type: String,
-  })
+  @Prop({ type: String })
   logo: string;
 
-  @Prop({
-    type: Types.ObjectId,
-    ref: 'User',
-  })
+  @Prop({ type: Types.ObjectId, ref: 'User' })
   createdBy: Types.ObjectId;
 
-  
+  @Prop({ type: [{ type: Types.ObjectId, ref: 'Brand' }] })
+  brands: Types.ObjectId[];
 }
 
-const brandSchema = SchemaFactory.createForClass(Brand);
+// Schema
+export const categorySchema = SchemaFactory.createForClass(Category);
 
-export const BrandModel = MongooseModule.forFeatureAsync([
+// Model
+export const CategoryModel = MongooseModule.forFeatureAsync([
   {
-    name: 'Brand',
+    name: Category.name,
     useFactory: () => {
-      const schema = brandSchema;
+      const schema = categorySchema;
       schema.pre('save', function () {
         this.slug = slugify(this.name, {
           replacement: '_',
@@ -58,4 +55,5 @@ export const BrandModel = MongooseModule.forFeatureAsync([
   },
 ]);
 
-export type BrandType = HydratedDocument<Brand>;
+// Type
+export type CategotyType = HydratedDocument<Category>;
