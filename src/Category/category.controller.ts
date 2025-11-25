@@ -1,6 +1,7 @@
 import {
   Body,
   Controller,
+  Get,
   Post,
   UploadedFile,
   UseInterceptors,
@@ -16,7 +17,7 @@ export class CategoryController {
   constructor(private readonly categoryService: CategoryService) {}
 
   // Add Category
-  @Post('add-category')
+  @Post('add')
   @Auth([RolesEnum.ADMIN])
   @UseInterceptors(FileInterceptor('logo', multerConfig))
   addCategory(
@@ -26,5 +27,11 @@ export class CategoryController {
     @UploadedFile() file: Express.Multer.File,
   ) {
     return this.categoryService.addCategory(name, brands, user, file);
+  }
+
+  // List All Categories
+  @Get('list')
+  listAllCategories() {
+    return this.categoryService.listAllCategories();
   }
 }

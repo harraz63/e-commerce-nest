@@ -42,6 +42,7 @@ export class CategoryService {
       const isBrandsExists = await this.brandRepo.findDocuments({
         _id: { $in: brands },
       });
+      console.log(isBrandsExists)
       if (isBrandsExists.length !== brands.length)
         throw new BadRequestException('Some brands do not exist');
     }
@@ -55,5 +56,22 @@ export class CategoryService {
     });
 
     return { category, logoUrl, logoKey };
+  }
+
+  // List All Categories
+  async listAllCategories() {
+    return await this.categoryRepo.findDocuments(
+      {},
+      {},
+      {
+        populate: [
+          {
+            path: 'brands',
+            select: 'name slug logo createdBy',
+            populate: [{ path: 'createdBy', select: 'name email' }],
+          },
+        ],
+      },
+    );
   }
 }

@@ -35,8 +35,6 @@ export class Brand {
     ref: 'User',
   })
   createdBy: Types.ObjectId;
-
-  
 }
 
 const brandSchema = SchemaFactory.createForClass(Brand);

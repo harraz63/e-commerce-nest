@@ -1,5 +1,5 @@
 // src/DB/Repositories/base.repository.ts
-import { FilterQuery, Model, ProjectionType } from 'mongoose';
+import { FilterQuery, Model, ProjectionType, QueryOptions } from 'mongoose';
 
 export class BaseRepository<T> {
   constructor(protected readonly model: Model<T>) {}
@@ -11,8 +11,9 @@ export class BaseRepository<T> {
   async findDocuments(
     filters: FilterQuery<T>,
     project?: ProjectionType<T>,
+    options?: QueryOptions<T>,
   ): Promise<T[]> {
-    return this.model.find(filters, project);
+    return this.model.find(filters, project, options);
   }
 
   async findOne(

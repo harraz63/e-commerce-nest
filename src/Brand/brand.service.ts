@@ -1,4 +1,5 @@
 import { BadGatewayException, Injectable } from '@nestjs/common';
+import { Types } from 'mongoose';
 import { S3ClientService } from 'src/Common';
 import { UserType } from 'src/DB/Models';
 import { BrandRepository } from 'src/DB/Repositories';
@@ -11,11 +12,7 @@ export class BrandService {
   ) {}
 
   // Add Brand
-  async addBrand(
-    body,
-    user: Partial<UserType>,
-    file: Express.Multer.File,
-  ) {
+  async addBrand(body, user: Partial<UserType>, file: Express.Multer.File) {
     const { name } = body;
 
     // Check If The Brand Name Is Already Exist
