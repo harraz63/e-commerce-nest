@@ -1,9 +1,13 @@
-import { BadRequestException, Injectable } from '@nestjs/common';
+import {
+  BadRequestException,
+  Injectable,
+  NotFoundException,
+} from '@nestjs/common';
 import { CreateProductDto } from './product.dto';
 import { UserType } from 'src/DB/Models';
 import { BrandRepository, CategotyRepository } from 'src/DB/Repositories';
 import { ProductRepository } from 'src/DB/Repositories/product.repository';
-import { S3ClientService } from 'src/Common';
+import { pagination, S3ClientService } from 'src/Common';
 
 @Injectable()
 export class ProductService {
@@ -60,5 +64,24 @@ export class ProductService {
     if (imagesWithUrls.length) returnObject['imagesWithUrls'] = imagesWithUrls;
 
     return returnObject;
+  }
+
+  // List All Products
+  async listProducts({ limit, page }) {
+    // Apply Pagination Concept
+    const { limit: currentLimit } = pagination({
+      limit: Number(limit),
+      page: Number(page),
+    });
+
+    // Get Products
+    const products = await this.productRepo.findDocuments(
+      {},
+      {},
+      { limit: currentLimit, page: Number(page) },
+    );
+    if (!products) throw new NotFoundException('No products founded');
+
+    return products;
   }
 }
