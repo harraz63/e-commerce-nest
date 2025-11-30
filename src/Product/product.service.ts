@@ -1,5 +1,6 @@
 import {
   BadRequestException,
+  Inject,
   Injectable,
   NotFoundException,
 } from '@nestjs/common';
@@ -8,14 +9,19 @@ import { UserType } from 'src/DB/Models';
 import { BrandRepository, CategotyRepository } from 'src/DB/Repositories';
 import { ProductRepository } from 'src/DB/Repositories/product.repository';
 import { pagination, S3ClientService } from 'src/Common';
+import { CACHE_MANAGER } from '@nestjs/cache-manager';
+import type { Cache } from 'cache-manager';
+import Redis from 'ioredis';
 
 @Injectable()
 export class ProductService {
+  private redis = new Redis('redis://localhost:6379');
   constructor(
     private readonly categoryRepo: CategotyRepository,
     private readonly brandRepo: BrandRepository,
     private readonly productRepo: ProductRepository,
     private readonly s3ClientService: S3ClientService,
+    @Inject(CACHE_MANAGER) private readonly cacheManager: Cache,
   ) {}
 
   // Add Product
@@ -74,13 +80,23 @@ export class ProductService {
       page: Number(page),
     });
 
-    // Get Products
-    const products = await this.productRepo.findDocuments(
-      {},
-      {},
-      { limit: currentLimit, page: Number(page) },
-    );
-    if (!products) throw new NotFoundException('No products founded');
+    const cacheKey = `products:page:${page}:limit:${currentLimit}`;
+
+    const products = await this.cacheManager.get(cacheKey);
+
+    if (!products) {
+      // Get Products From DB And Set It In Cache
+      const dbProducts = await this.productRepo.findDocuments(
+        {},
+        {},
+        { limit: currentLimit, page: Number(page) },
+      );
+      await this.cacheManager.set(cacheKey, dbProducts, 30 * 60 * 1000);
+      console.log('Products from DB');
+      return dbProducts;
+    }
+
+    console.log('Products from cache');
 
     return products;
   }
