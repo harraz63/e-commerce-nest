@@ -19,6 +19,7 @@ export class BaseRepository<T> {
   async findOne(
     filters: FilterQuery<T>,
     project?: ProjectionType<T>,
+    options?: QueryOptions<T>,
   ): Promise<T | null> {
     return this.model.findOne(filters, project);
   }

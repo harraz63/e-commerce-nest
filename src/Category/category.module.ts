@@ -11,3 +11,4 @@ import { S3ClientService } from 'src/Common';
   providers: [CategoryService, CategotyRepository, S3ClientService, BrandRepository],
 })
 export class CategoryModule {}
+  
