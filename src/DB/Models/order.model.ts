@@ -11,7 +11,7 @@ export class Order {
   @Prop({ type: Types.ObjectId, ref: 'Cart', required: true })
   cartId: string;
 
-  @Prop({ type: Date, default: Date.now() + 3 * 24 * 60 * 60 * 1000 })
+  @Prop({ type: Date, default: Date.now() + 3 * 24 * 60 * 60 * 1000 }) // 3 days from now
   arriveAt: Date;
 
   @Prop({ type: Number })
