@@ -11,6 +11,9 @@ import { GlobalModule } from './Modules/global.module';
 import { CategoryModule } from './Category/category.module';
 import { CacheModule } from '@nestjs/cache-manager';
 import KeyvRedis from '@keyv/redis';
+import { CartController } from './Cart/cart.controller';
+import { CartModule } from './Cart/cart.module';
+import { OrderModule } from './Order/order.module';
 
 @Module({
   imports: [
@@ -18,6 +21,8 @@ import KeyvRedis from '@keyv/redis';
     BrandModule,
     CategoryModule,
     ProductModule,
+    CartModule,
+    OrderModule,
     GlobalModule,
     MongooseModule.forRoot(process.env.DB_URL as string),
     CacheModule.registerAsync({

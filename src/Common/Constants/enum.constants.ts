@@ -28,6 +28,7 @@ export enum orderStatusEnum {
   RETURNED = 'returned',
   CANCELLED = 'cancelled',
   REFUNDED = 'refunded',
+  PAID = 'paid',
 }
 
 export enum paymentMethodEnum {

@@ -1,24 +1,9 @@
 import { Schema, SchemaFactory, MongooseModule, Prop } from '@nestjs/mongoose';
 import { HydratedDocument, Types } from 'mongoose';
 import slugify from 'slugify';
+import { S3ClientService } from 'src/Common/Services';
 
-/**
- * title  
- * slug  
- * overview  
- *
-  price  
-  discount  
-  finalPrice  
-  stock  
-  rating  
- *
-  images  
- *
-  category  
-  brand  
-  createdBy  
- */
+const s3Client = new S3ClientService();
 
 // Class
 @Schema({ timestamps: true })
@@ -76,7 +61,6 @@ export class Product {
   createdBy: Types.ObjectId;
 }
 
-
 // Schema
 export const productSchema = SchemaFactory.createForClass(Product);
 
@@ -88,8 +72,12 @@ export const ProductModel = MongooseModule.forFeatureAsync([
       const schema = productSchema;
       // Hook For Pre Save
       schema.pre('save', function () {
-        this.slug = slugify(this.title, { replacement: '_', lower: true, trim: true });
-        this.finalPrice = this.price - (this.price * this.discount / 100);
+        this.slug = slugify(this.title, {
+          replacement: '_',
+          lower: true,
+          trim: true,
+        });
+        this.finalPrice = this.price - (this.price * this.discount) / 100;
       });
       return schema;
     },
@@ -97,4 +85,6 @@ export const ProductModel = MongooseModule.forFeatureAsync([
 ]);
 
 // Type
-export type ProductType = HydratedDocument<Product>;
+export type ProductType = HydratedDocument<Product> & {
+  firstImageUrl?: string | null; // optional property
+};

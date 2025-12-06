@@ -1,6 +1,7 @@
 import { MongooseModule, Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
 import { HydratedDocument, Types } from 'mongoose';
-import { orderStatusEnum, paymentMethodEnum } from 'src/Common';
+import { paymentMethodEnum } from 'src/Common';
+import { orderStatusEnum } from 'src/Common/Constants/enum.constants';
 
 // Class
 @Schema({ timestamps: true })
@@ -23,7 +24,11 @@ export class Order {
   @Prop({ type: String, required: true })
   phone: string;
 
-  @Prop({ type: String, enum: orderStatusEnum })
+  @Prop({
+    type: String,
+    enum: orderStatusEnum,
+    default: orderStatusEnum.PENDING,
+  })
   orderStatus: string;
 
   @Prop({ type: String, enum: paymentMethodEnum })
