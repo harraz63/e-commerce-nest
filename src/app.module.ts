@@ -14,6 +14,7 @@ import KeyvRedis from '@keyv/redis';
 import { CartController } from './Cart/cart.controller';
 import { CartModule } from './Cart/cart.module';
 import { OrderModule } from './Order/order.module';
+import { PaymentModule } from './Paymant/payment.module';
 
 @Module({
   imports: [
@@ -24,6 +25,7 @@ import { OrderModule } from './Order/order.module';
     CartModule,
     OrderModule,
     GlobalModule,
+    PaymentModule,
     MongooseModule.forRoot(process.env.DB_URL as string),
     CacheModule.registerAsync({
       isGlobal: true,
