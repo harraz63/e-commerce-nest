@@ -34,6 +34,9 @@ export class Order {
   @Prop({ type: String, enum: paymentMethodEnum })
   paymentMethod: string;
 
+  @Prop({ type: String })
+  paymentIntentId: string;
+
   // This field can be used to track the order changes and can be separated on a model
   @Prop({
     type: {

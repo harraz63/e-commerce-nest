@@ -9,9 +9,10 @@ import {
 import { CartModel, OrderModel, ProductModel } from 'src/DB/Models';
 import { CartService } from 'src/Cart/cart.service';
 import { S3ClientService } from 'src/Common';
+import { PaymentModule } from 'src/Paymant/payment.module';
 
 @Module({
-  imports: [OrderModel, CartModel, ProductModel],
+  imports: [OrderModel, CartModel, ProductModel, PaymentModule],
   controllers: [OrderController],
   providers: [
     OrderService,

@@ -19,6 +19,22 @@ export class OrderController {
     return await this.orderService.createOrder({ order, user });
   }
 
+  // Pay Order
+  @Post('pay')
+  @Auth([RolesEnum.USER])
+  async payOrder(
+    @AuthUser() user: { user: Partial<UserType> },
+    @Body('orderId') orderId: string,
+  ) {
+    return await this.orderService.payOrder({ orderId, user });
+  }
+
+  // Webhook
+  @Post('webhook')
+  webhook(@Body() body) {
+    return this.orderService.webhook(body);
+  }
+
   // Cancel Order
   @Post('cancel')
   @Auth([RolesEnum.USER])
